@@ -26,30 +26,34 @@ dt$date <- as.Date(dt$date, format="%Y-%m-%d")
 dt$interval <- as.factor(dt$interval)
 dt[, 1] <- as.numeric(as.factor( dt[, 1] ))
 ```
-
+```{r}
 ## What is mean total number of steps taken per day?
 ### 1. Calculate the total number of steps taken per day
 steps_per_day <- aggregate(steps ~ date, data=dt, FUN=sum)
+```
 
+```{r}
 #Make a histogram of the total number of steps taken each day
 hist(steps_per_day$steps, col="light blue",xlab = "Total steps daily", 
         main = "Number of steps per day")
 
 mean(steps_per_day$steps,na.rm = TRUE)
 #23848.47
+```
 
+```{r}
 #Calculate the median of the total number of steps taken per day
 median(steps_per_day$steps,na.rm = TRUE)
 #25666
-
-
+```
+```{r}
 ## What is the average daily activity pattern?
 1. Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 steps_i <- aggregate(steps ~ interval, data = dt, FUN = mean, na.rm = TRUE)
 steps_i$interval <- as.integer(levels(steps_i$interval)[steps_i$interval])
 colnames(steps_i) <- c("interval", "steps")
 str(steps_i)
-
+```
 
 #timeseries graph
 plot(steps_i$interval,steps_i$steps,type="l",xlab="5-minute interval",

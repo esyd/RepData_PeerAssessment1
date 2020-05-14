@@ -5,7 +5,7 @@ output:
     keep_md: true
 ---
 
-
+```{r}
 ## Loading and preprocessing the data
 unzip(zipfile, files = NULL, list = FALSE, overwrite = TRUE,
       junkpaths = FALSE, exdir = ".", unzip = "internal",
@@ -13,16 +13,19 @@ unzip(zipfile, files = NULL, list = FALSE, overwrite = TRUE,
 
 data <- read.table("activity.csv",header=T,sep=",")
 head(data)
-
+```
+```{r}
 #replace columns names
 colnames(data) <- c("steps", "date", "interval")
 dt <- data[-c(1),] 
 str(dt)
-
+```
+```{r}
 #Convert some of the vectors to appropriate forms
 dt$date <- as.Date(dt$date, format="%Y-%m-%d")
 dt$interval <- as.factor(dt$interval)
 dt[, 1] <- as.numeric(as.factor( dt[, 1] ))
+```
 
 ## What is mean total number of steps taken per day?
 ### 1. Calculate the total number of steps taken per day

@@ -77,6 +77,69 @@ cout_missing_values
 ```
 
 
+### 2. Fill in all of the missing values in the dataset
+```{r}
+dn <- dt
+i_na <- which(is.na(dn$steps))
+for (i in i_na) {
+  dn$steps[i] <- with(steps_i, steps[interval = dn$interval[i]])
+}
+```
+
+
+### 3. Histogram of the total number of steps taken each day
+```{r}
+hist(dn$steps, col="light blue",xlab = "Total steps daily", 
+         main = "Number of steps per day with imputed values")
+```
+
+         
+### 4. Calculate and report the mean total number of steps taken per day
+```{r}
+mean(dn$steps,na.rm = TRUE)
+```
+
+
+### 5. Calculate and report the median total number of steps taken per day
+```{r}
+median(dn$steps,na.rm = TRUE)
+```
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+### 1. Create a new factor variable in the dataset with two levels - “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+```{r}
+library(data.table)
+
+d_table <- data.table(dn)
+d_table[, weekday := ifelse(weekdays(date) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")]
+d_table$weekday <- as.factor(d_table$weekday)
+d_table$interval <- as.integer(levels(d_table$interval)[d_table$interval])
+head(d_table, 10)
+```
+
+
+### 2. Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
+```{r}
+steps_w <- aggregate(steps ~ interval+weekday, data = d_table, FUN = mean)
+plot(steps_w, aes(x = interval, y = steps)) + 
+  geom_line(col = "blue", size = 1) + 
+  facet_wrap(~ weekday, nrow=2, ncol=1) + 
+  labs(x = "Interval", y = "Number of Steps")
+  
+ xyplot(steps ~ interval | day_type,
+           data = d_table,
+           type="l",
+           xlab="Interval",ylab="Number of steps",main="Average weekday/weekend activity pattern",
+           col.line = "blue",
+           layout=c(1,2))
+```
+
+
+
+
+
+
 
 
 

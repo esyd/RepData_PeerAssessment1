@@ -18,16 +18,38 @@ dat <- read.table("activity.csv",header=T,sep=",")
 
 head(dat)
 ```
+#steps    date   interval  
+#<int>    <fctr>  <int>
+#1	NA	2012-10-01	0	
+#2	NA	2012-10-01	5	
+#3	NA	2012-10-01	10	
+#4	NA	2012-10-01	15	
+#5	NA	2012-10-01	20	
+#6	NA	2012-10-01	25	
+#6 rows
+
+
 
 
 ```{r}
 typeof(dat)
 ```
+#[1] "list"
+
 ### create a new variable - dataFrame
 ```{r}
 dt <- data.frame(dat)
 head(dt)
 ```
+#steps    date   interval  
+#<int>    <fctr>  <int>
+#1	NA	2012-10-01	0	
+#2	NA	2012-10-01	5	
+#3	NA	2012-10-01	10	
+#4	NA	2012-10-01	15	
+#5	NA	2012-10-01	20	
+#6	NA	2012-10-01	25	
+#6 rows
 
 
 
@@ -43,17 +65,35 @@ head(steps_per_day)
 ```
 
 
+    
+      date    steps
+     <fctr>   <int>
+1	2012-10-02	126		
+2	2012-10-03	11352		
+3	2012-10-04	12116		
+4	2012-10-05	13294		
+5	2012-10-06	15420		
+6	2012-10-07	11015		
+6 rows
+
 ## Make a histogram of the total number of steps taken each day
 ```{r}
 hist(steps_per_day$steps, col="blue",xlab = "Total steps daily", 
         main = "Number of steps per day")
 ```
 
+
+
+
+
 ### Calculate the mean and median of the total number of steps taken per day
 ```{r}
 median(steps_per_day$steps,na.rm = TRUE)
 mean(steps_per_day$steps,na.rm = TRUE)
 ```
+#[1] 10765
+#[1] 10766.19
+
 
 ## What is the average daily activity pattern?
 ### 1. Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
@@ -61,6 +101,10 @@ mean(steps_per_day$steps,na.rm = TRUE)
 steps_i <- aggregate(steps ~ interval, data = dt, FUN = mean, na.rm = TRUE)
 str(steps_i)
 ```
+#'data.frame':	288 obs. of  2 variables:
+#$ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+#$ steps   : num  1.717 0.3396 0.1321 0.1509 0.0755 ...
+
 
 ## timeseries graph
 ```{r}
@@ -68,11 +112,17 @@ plot(steps_i$interval,steps_i$steps,type="l",xlab="time = 5 min",
         ylab="Average number of steps",main="Average daily activity pattern")
 ```
 
+
+
 ## 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```{r}
 max_i <- steps_i[which.max(steps_i$steps),]
 max_i
 ```
+#interval   steps
+#<int>      <dbl>
+#104	835	206.1698		
+#1 row
 
 
 ## Imputing missing values
@@ -81,6 +131,7 @@ max_i
 cout_missing_values <- sum(is.na(dt$steps))
 cout_missing_values
 ```
+#[1] 2304
 
 
 
@@ -100,7 +151,8 @@ dt_Imputed <- ddply(dt, "interval", mutate, imputed.value = impute(steps, mean))
 median(dt_Imputed$steps,na.rm = TRUE)
 mean(dt_Imputed$steps,na.rm = TRUE)
 ```
-
+#[1] 0
+#[1] 37.3826
 
 ## alternative way
 
@@ -122,7 +174,8 @@ dt_Inputed_2 <- fillITin(dt)
 median(dt_Inputed_2$steps,na.rm = TRUE)
 mean(dt_Inputed_2$steps,na.rm = TRUE)
 ```
-
+#[1] 0
+#[1] 37.3826
 
 
 ### 3. Histogram of the total number of steps taken each day
@@ -136,12 +189,13 @@ hist(dt_Inputed_2$steps, col="light blue",xlab = "Total steps daily",
 ```{r}
 mean(dt_Inputed_2$steps,na.rm = TRUE)
 ```
-
+#[1] 37.3826
 
 ### 5. Calculate and report the median total number of steps taken per day
 ```{r}
 median(dt_Inputed_2$steps,na.rm = TRUE)
 ```
+#[1] 0
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ### 1. Create a new factor variable in the dataset with two levels - “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.

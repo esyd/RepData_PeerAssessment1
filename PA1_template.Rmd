@@ -5,28 +5,35 @@ output:
     keep_md: true
 ---
 
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
-------
 ```{r}
+#install.packages("mice")
 library(dplyr)
 library(ggplot2)
-
+require(plyr)
+require(Hmisc)
 ```
 
 ```{r}
 dat <- read.table("activity.csv",header=T,sep=",")
+
 head(dat)
 ```
+
+
+```{r}
+typeof(dat)
+```
+### create a new variable - dataFrame
+```{r}
+dt <- data.frame(dat)
+head(dt)
+```
+
 
 
 ## What is mean total number of steps taken per day?
 ### 1. Calculate the total number of steps taken per day
 ```{r}
-dt <- dat
 steps_per_day <- aggregate(steps ~ date, data=dt, FUN=sum)
 ```
 
@@ -38,7 +45,7 @@ head(steps_per_day)
 
 ## Make a histogram of the total number of steps taken each day
 ```{r}
-hist(steps_per_day$steps, col="light blue",xlab = "Total steps daily", 
+hist(steps_per_day$steps, col="blue",xlab = "Total steps daily", 
         main = "Number of steps per day")
 ```
 
@@ -46,7 +53,6 @@ hist(steps_per_day$steps, col="light blue",xlab = "Total steps daily",
 ```{r}
 median(steps_per_day$steps,na.rm = TRUE)
 mean(steps_per_day$steps,na.rm = TRUE)
-
 ```
 
 ## What is the average daily activity pattern?
@@ -58,7 +64,7 @@ str(steps_i)
 
 ## timeseries graph
 ```{r}
-plot(steps_i$interval,steps_i$steps,type="l",xlab="time",
+plot(steps_i$interval,steps_i$steps,type="l",xlab="time = 5 min",
         ylab="Average number of steps",main="Average daily activity pattern")
 ```
 
@@ -77,71 +83,79 @@ cout_missing_values
 ```
 
 
+
 ### 2. Fill in all of the missing values in the dataset
+
+
+### 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+
 ```{r}
-dn <- dt
-i_na <- which(is.na(dn$steps))
-for (i in i_na) {
-  dn$steps[i] <- with(steps_i, steps[interval = dn$interval[i]])
-}
+dt_Imputed <- ddply(dt, "interval", mutate, imputed.value = impute(steps, mean))
+#dt_Imputed <- ddply(dt$steps, mean)
 ```
+
+
+```{r}
+median(dt_Imputed$steps,na.rm = TRUE)
+mean(dt_Imputed$steps,na.rm = TRUE)
+```
+
+
+## alternative way
+
+```{r}
+fillITin <-  function(x){
+
+x$steps[is.na(x$steps)] <- ave(x$steps,  
+                                     FUN = function(z) 
+                                    mean(z, na.rm = TRUE))[c(which(is.na(x$steps)))]
+return(x)
+}
+
+
+dt_Inputed_2 <- fillITin(dt)
+```
+
+
+```{r}
+median(dt_Inputed_2$steps,na.rm = TRUE)
+mean(dt_Inputed_2$steps,na.rm = TRUE)
+```
+
 
 
 ### 3. Histogram of the total number of steps taken each day
 ```{r}
-hist(dn$steps, col="light blue",xlab = "Total steps daily", 
+hist(dt_Inputed_2$steps, col="light blue",xlab = "Total steps daily", 
          main = "Number of steps per day with imputed values")
 ```
 
          
 ### 4. Calculate and report the mean total number of steps taken per day
 ```{r}
-mean(dn$steps,na.rm = TRUE)
+mean(dt_Inputed_2$steps,na.rm = TRUE)
 ```
 
 
 ### 5. Calculate and report the median total number of steps taken per day
 ```{r}
-median(dn$steps,na.rm = TRUE)
+median(dt_Inputed_2$steps,na.rm = TRUE)
 ```
-
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ### 1. Create a new factor variable in the dataset with two levels - “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 ```{r}
-library(data.table)
-
-d_table <- data.table(dn)
-d_table[, weekday := ifelse(weekdays(date) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")]
-d_table$weekday <- as.factor(d_table$weekday)
-d_table$interval <- as.integer(levels(d_table$interval)[d_table$interval])
-head(d_table, 10)
+dt_Inputed_2$dateType <-  ifelse(as.POSIXlt(dt_Inputed_2$date)$wday %in% c(0,6), 'weekend', 'weekday')
 ```
 
 
 ### 2. Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 ```{r}
-steps_w <- aggregate(steps ~ interval+weekday, data = d_table, FUN = mean)
-plot(steps_w, aes(x = interval, y = steps)) + 
-  geom_line(col = "blue", size = 1) + 
-  facet_wrap(~ weekday, nrow=2, ncol=1) + 
-  labs(x = "Interval", y = "Number of Steps")
-  
- xyplot(steps ~ interval | day_type,
-           data = d_table,
-           type="l",
-           xlab="Interval",ylab="Number of steps",main="Average weekday/weekend activity pattern",
-           col.line = "blue",
-           layout=c(1,2))
+av_dt_Inputed_2 <- aggregate(steps ~ interval + dateType, data=dt_Inputed_2, mean)
+ggplot(av_dt_Inputed_2, aes(interval, steps)) + 
+    geom_line() + 
+    facet_grid(dateType ~ .) +
+    xlab("5-minute interval") + 
+    ylab("avarage number of steps")
 ```
-
-
-
-
-
-
-
-
-
-
-

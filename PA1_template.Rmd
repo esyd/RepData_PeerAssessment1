@@ -56,9 +56,8 @@ steps_i <- aggregate(steps ~ interval, data = dt, FUN = mean, na.rm = TRUE)
 str(steps_i)
 ```
 
-
+## timeseries graph
 ```{r}
-#timeseries graph
 plot(steps_i$interval,steps_i$steps,type="l",xlab="time",
         ylab="Average number of steps",main="Average daily activity pattern")
 ```
